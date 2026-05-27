@@ -1,0 +1,25 @@
+{
+  "name": "sharpkit",
+  "version": "1.0.0",
+  "description": "Plug-and-play Sharp Token integration layer",
+  "type": "commonjs",
+  "scripts": {
+    "backend": "node backend/server.js",
+    "compile": "hardhat compile",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "node": "hardhat node"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.11.1",
+    "express": "^4.19.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+"hardhat": "^2.22.0"
+  }
+}

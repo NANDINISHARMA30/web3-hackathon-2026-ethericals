@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SharpKit — Sharp Token Integration Layer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="logo"><span></span>SharpKit</div>
+    <div class="tagline">Plug-and-play Sharp Token for any app</div>
+    <div class="api-key-bar">
+      <span>API Key:</span>
+      <input id="apiKeyInput" type="text" value="test_key" placeholder="Enter API key"/>
+      <span id="keyStatus" class="badge green">✓ Valid</span>
+    </div>
+  </header>
+
+  <!-- STATS BAR -->
+  <section class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label">Total Users</div>
+      <div class="stat-value" id="statUsers">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Tokens Issued</div>
+      <div class="stat-value" id="statTotal">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Recent Transactions</div>
+      <div class="stat-value" id="statTxCount">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Active Rules</div>
+      <div class="stat-value" id="statRules">—</div>
+    </div>
+  </section>
+
+  <!-- MAIN GRID -->
+  <main class="grid">
+
+    <!-- EARN -->
+    <div class="card">
+      <div class="card-header earn">
+        <span class="icon">+</span>
+        <h2>Earn Tokens</h2>
+        <code class="endpoint">POST /api/earn</code>
+      </div>
+      <div class="card-body">
+        <label>User ID</label>
+        <input id="earnUserId" type="text" value="user123" placeholder="user123"/>
+        <label>Amount (SHRP)</label>
+        <input id="earnAmount" type="number" value="50" min="1"/>
+        <label>Reason</label>
+        <input id="earnReason" type="text" value="daily_login" placeholder="reason"/>
+        <button class="btn earn-btn" onclick="doEarn()">Reward Tokens →</button>
+        <div id="earnResult" class="result hidden"></div>
+      </div>
+    </div>
+
+    <!-- SPEND -->
+    <div class="card">
+      <div class="card-header spend">
+        <span class="icon">−</span>
+        <h2>Spend Tokens</h2>
+        <code class="endpoint">POST /api/spend</code>
+      </div>
+      <div class="card-body">
+        <label>User ID</label>
+        <input id="spendUserId" type="text" value="user123" placeholder="user123"/>
+        <label>Amount (SHRP)</label>
+        <input id="spendAmount" type="number" value="20" min="1"/>
+        <label>Reason</label>
+        <input id="spendReason" type="text" value="redeem_discount" placeholder="reason"/>
+        <button class="btn spend-btn" onclick="doSpend()">Spend Tokens →</button>
+        <div id="spendResult" class="result hidden"></div>
+      </div>
+    </div>
+
+    <!-- BALANCE CHECK -->
+    <div class="card">
+      <div class="card-header balance">
+        <span class="icon">◎</span>
+        <h2>Check Balance</h2>
+        <code class="endpoint">GET /api/balance/:userId</code>
+      </div>
+      <div class="card-body">
+        <label>User ID</label>
+        <input id="balUserId" type="text" value="user123" placeholder="user123"/>
+        <button class="btn balance-btn" onclick="doBalance()">Get Balance →</button>
+        <div id="balResult" class="result hidden"></div>
+      </div>
+    </div>
+
+    <!-- BUY TOKENS -->
+    <div class="card">
+      <div class="card-header buy">
+        <span class="icon">↗</span>
+        <h2>Buy Tokens</h2>
+        <code class="endpoint">POST /api/buy/mock</code>
+      </div>
+      <div class="card-body">
+        <label>User ID</label>
+        <input id="buyUserId" type="text" value="user123" placeholder="user123"/>
+        <label>Amount (SHRP = INR for demo)</label>
+        <input id="buyAmount" type="number" value="100" min="1"/>
+        <div class="buy-buttons">
+          <button class="btn buy-fiat-btn" onclick="doBuyFiat()">Buy with Card (Mock)</button>
+          <button class="btn buy-crypto-btn" onclick="doBuyCrypto()">Buy with MetaMask</button>
+        </div>
+        <div id="buyResult" class="result hidden"></div>
+        <div id="walletAddress" class="wallet-pill hidden"></div>
+      </div>
+    </div>
+
+    <!-- REWARD RULES -->
+    <div class="card wide">
+      <div class="card-header rules">
+        <span class="icon">≡</span>
+        <h2>Reward Rules</h2>
+        <span class="subtitle">Define automatic earn triggers</span>
+      </div>
+      <div class="card-body">
+        <div class="rule-form">
+          <input id="ruleName" type="text" placeholder="Rule name (e.g. Daily Login)"/>
+          <input id="ruleEvent" type="text" placeholder="Event key (e.g. daily_login)"/>
+          <input id="ruleReward" type="number" placeholder="SHRP reward" min="1"/>
+          <button class="btn rules-btn" onclick="createRule()">+ Add Rule</button>
+        </div>
+        <div id="rulesList" class="rules-list"></div>
+      </div>
+    </div>
+
+    <!-- TRANSACTION LOG -->
+    <div class="card wide">
+      <div class="card-header txlog">
+        <span class="icon">⊡</span>
+        <h2>Transaction Log</h2>
+        <button class="btn sm refresh-btn" onclick="loadTxLog()">↺ Refresh</button>
+      </div>
+      <div class="card-body">
+        <div id="txTable" class="tx-table-wrap">
+          <p class="muted">Loading…</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SDK SNIPPET -->
+    <div class="card wide">
+      <div class="card-header sdk">
+        <span class="icon">{}</span>
+        <h2>Plug-and-Play SDK</h2>
+        <span class="subtitle">Drop this into any app</span>
+      </div>
+      <div class="card-body">
+        <pre class="code-block"><code id="sdkSnippet"></code></pre>
+        <button class="btn sdk-btn" onclick="copySnippet()">Copy Snippet</button>
+        <div id="copyMsg" class="result hidden">Copied!</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
