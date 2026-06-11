@@ -44,6 +44,7 @@ frontend/
   index.html               Single-page dashboard — 7 cards: Earn, Spend, Balance, Buy, Rules, TxLog, SDK Snippet
   style.css                Glassmorphism dark theme, CSS vars, no framework — accent color: #7c3aed (purple)
   app.js                   Vanilla JS — all fetch calls, MetaMask (eth_requestAccounts + eth_sendTransaction), live reload every 15s
+  vite-tanstack-config.ts   Local shim for the generated Vite/TanStack config helper used by vite.config.ts
 
 sdk/
   sharpkit.js              UMD module (browser global + CJS + AMD)
@@ -68,6 +69,7 @@ sdk/
 ## Smart Contract
 
 ### `contracts/SharpToken.sol`
+
 - `ERC20("Sharp Token", "SHRP")` + `Ownable(msg.sender)` — OZ 5.x
 - Constructor: `_mint(treasury, 10_000_000 * 1e18)` — treasury passed as constructor arg
 - `mint(address to, uint256 amount, string reason)` — `onlyOwner`, checks MAX_SUPPLY (1B)
@@ -79,19 +81,19 @@ sdk/
 
 ## Backend Routes — Full Reference
 
-| Method | Path | Auth | Body/Params | Returns |
-|---|---|---|---|---|
-| GET | `/api/health` | None | — | `{status, version}` |
-| POST | `/api/earn` | ✓ | `{userId, amount, reason?}` | `{success, tx}` |
-| POST | `/api/spend` | ✓ | `{userId, amount, reason?}` | `{success, tx}` or 402 |
-| GET | `/api/balance/:userId` | ✓ | — | `{userId, balance}` |
-| GET | `/api/balance/txlog/all` | ✓ | `?limit=N` | `{transactions[]}` |
-| GET | `/api/balance/admin/all` | ✓ | — | `{balances: {userId: number}}` |
-| GET | `/api/balance/rules/all` | ✓ | — | `{rules[]}` |
-| POST | `/api/balance/rules/create` | ✓ | `{name, event, reward}` | `{success, rule}` |
-| DELETE | `/api/balance/rules/:id` | ✓ | — | `{success: bool}` |
-| POST | `/api/buy/mock` | ✓ | `{userId, amount, currency?, paymentMethod?}` | `{success, tx}` |
-| POST | `/api/buy/verify-crypto` | ✓ | `{userId, txHash, amount}` | `{success, tx}` |
+| Method | Path                        | Auth | Body/Params                                   | Returns                        |
+| ------ | --------------------------- | ---- | --------------------------------------------- | ------------------------------ |
+| GET    | `/api/health`               | None | —                                             | `{status, version}`            |
+| POST   | `/api/earn`                 | ✓    | `{userId, amount, reason?}`                   | `{success, tx}`                |
+| POST   | `/api/spend`                | ✓    | `{userId, amount, reason?}`                   | `{success, tx}` or 402         |
+| GET    | `/api/balance/:userId`      | ✓    | —                                             | `{userId, balance}`            |
+| GET    | `/api/balance/txlog/all`    | ✓    | `?limit=N`                                    | `{transactions[]}`             |
+| GET    | `/api/balance/admin/all`    | ✓    | —                                             | `{balances: {userId: number}}` |
+| GET    | `/api/balance/rules/all`    | ✓    | —                                             | `{rules[]}`                    |
+| POST   | `/api/balance/rules/create` | ✓    | `{name, event, reward}`                       | `{success, rule}`              |
+| DELETE | `/api/balance/rules/:id`    | ✓    | —                                             | `{success: bool}`              |
+| POST   | `/api/buy/mock`             | ✓    | `{userId, amount, currency?, paymentMethod?}` | `{success, tx}`                |
+| POST   | `/api/buy/verify-crypto`    | ✓    | `{userId, txHash, amount}`                    | `{success, tx}`                |
 
 ---
 
@@ -114,12 +116,12 @@ sdk/
 UMD pattern — works in `<script>` tag (sets `window.SharpKit`), `require()` (CommonJS), or `define()` (AMD).
 
 ```js
-SharpKit.init({ apiKey: "test_key", baseUrl: "http://localhost:4000" })
-SharpKit.reward(userId, amount, reason)       // POST /api/earn
-SharpKit.spend(userId, amount, reason)        // POST /api/spend
-SharpKit.getBalance(userId)                   // GET  /api/balance/:userId
-SharpKit.buyWithFiat(userId, amount, method)  // POST /api/buy/mock
-SharpKit.verifyCryptoPurchase(userId, txHash, amount) // POST /api/buy/verify-crypto
+SharpKit.init({ apiKey: "test_key", baseUrl: "http://localhost:4000" });
+SharpKit.reward(userId, amount, reason); // POST /api/earn
+SharpKit.spend(userId, amount, reason); // POST /api/spend
+SharpKit.getBalance(userId); // GET  /api/balance/:userId
+SharpKit.buyWithFiat(userId, amount, method); // POST /api/buy/mock
+SharpKit.verifyCryptoPurchase(userId, txHash, amount); // POST /api/buy/verify-crypto
 ```
 
 Internal: `_post(path, body)` and `_get(path)` share auth headers. Throws on non-ok responses.
@@ -140,30 +142,31 @@ npm run node             # hardhat node (local chain)
 
 ## Env Variables
 
-| Variable | Default | Used In |
-|---|---|---|
-| `PORT` | `4000` | `server.js` |
-| `API_KEYS` | `test_key,demo_key_123` | `server.js` auth middleware |
-| `SEPOLIA_RPC_URL` | — | `hardhat.config.js` |
-| `PRIVATE_KEY` | — | `hardhat.config.js` |
-| `ETHERSCAN_API_KEY` | — | `hardhat.config.js` |
-| `SHARP_TOKEN_ADDRESS` | — | Not yet wired (for future on-chain earn) |
-| `TREASURY_PRIVATE_KEY` | — | Not yet wired (for future on-chain mint) |
+| Variable               | Default                 | Used In                                  |
+| ---------------------- | ----------------------- | ---------------------------------------- |
+| `PORT`                 | `4000`                  | `server.js`                              |
+| `API_KEYS`             | `test_key,demo_key_123` | `server.js` auth middleware              |
+| `SEPOLIA_RPC_URL`      | —                       | `hardhat.config.js`                      |
+| `PRIVATE_KEY`          | —                       | `hardhat.config.js`                      |
+| `ETHERSCAN_API_KEY`    | —                       | `hardhat.config.js`                      |
+| `SHARP_TOKEN_ADDRESS`  | —                       | Not yet wired (for future on-chain earn) |
+| `TREASURY_PRIVATE_KEY` | —                       | Not yet wired (for future on-chain mint) |
 
 ---
 
 ## Known Gaps / Future Work
 
-| ID | Priority | Description |
-|---|---|---|
-| ~~F1~~ | ~~MED~~ | ~~Backend should verify Sepolia txHash on-chain~~ — DONE: `buy/verify-crypto` uses `waitForTransaction` + amount check |
-| ~~F2~~ | ~~MED~~ | ~~Wire on-chain mint for earn~~ — DONE: fire-and-forget `SharpToken.mint()` after res.json() in earn.js |
-| F3 | MED | Replace in-memory `store.js` with MongoDB/Redis for persistence |
-| ~~F4~~ | ~~LOW~~ | ~~Add rate limiting~~ — DONE: Map-based limiter in server.js (100/min global, 20/min earn/spend/buy) |
-| F5 | LOW | Add JWT or Clerk auth for the dashboard itself |
-| F6 | LOW | Webhook retry logic + signature verification |
+| ID     | Priority | Description                                                                                                            |
+| ------ | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| ~~F1~~ | ~~MED~~  | ~~Backend should verify Sepolia txHash on-chain~~ — DONE: `buy/verify-crypto` uses `waitForTransaction` + amount check |
+| ~~F2~~ | ~~MED~~  | ~~Wire on-chain mint for earn~~ — DONE: fire-and-forget `SharpToken.mint()` after res.json() in earn.js                |
+| F3     | MED      | Replace in-memory `store.js` with MongoDB/Redis for persistence                                                        |
+| ~~F4~~ | ~~LOW~~  | ~~Add rate limiting~~ — DONE: Map-based limiter in server.js (100/min global, 20/min earn/spend/buy)                   |
+| F5     | LOW      | Add JWT or Clerk auth for the dashboard itself                                                                         |
+| F6     | LOW      | Webhook retry logic + signature verification                                                                           |
 
 ## Bug Fixed
+
 - `.env` had `SHARP_TOKEN_ADDRESS=0xe96Caa87...` (deployer wallet). Corrected to `0x264F12a1d8e671673D2A71198D212482aAFc9dBa` (actual contract).
 
 ---
@@ -182,6 +185,7 @@ npm run node             # hardhat node (local chain)
 ## How to Update This File
 
 After any code change, update the relevant section:
+
 - Added a route → update **Backend Routes** table
 - Changed store schema → update **Key Design Decisions**
 - New SDK method → update **SDK** section
