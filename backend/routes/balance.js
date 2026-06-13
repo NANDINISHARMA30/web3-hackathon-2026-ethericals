@@ -4,12 +4,6 @@ const { v4: uuidv4 } = require("uuid");
 
 const router = express.Router();
 
-// GET /api/balance/:userId
-router.get("/:userId", (req, res) => {
-  const { userId } = req.params;
-  res.json({ userId, balance: getBalance(userId) });
-});
-
 // GET /api/txlog?limit=50
 router.get("/txlog/all", (req, res) => {
   const limit = Math.min(Number(req.query.limit) || 50, 200);
@@ -24,6 +18,12 @@ router.get("/admin/all", (req, res) => {
 // GET /api/rules
 router.get("/rules/all", (req, res) => {
   res.json({ rules: getRules() });
+});
+
+// GET /api/balance/:userId  — must come after all specific routes
+router.get("/:userId", (req, res) => {
+  const { userId } = req.params;
+  res.json({ userId, balance: getBalance(userId) });
 });
 
 // POST /api/rules
