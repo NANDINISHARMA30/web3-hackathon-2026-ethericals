@@ -4,7 +4,7 @@
   // ─── Config ──────────────────────────────────────────────────────────────
   const script  = document.currentScript;
   const W       = window.SharpKitConfig || {};
-  const API_KEY = script?.dataset?.key      || W.apiKey  || "test_key";
+  const API_KEY = script?.dataset?.apiKey   || W.apiKey  || "test_key";
   const USER_ID = script?.dataset?.userId   || W.userId  || "guest";
   const BASE    = script?.dataset?.baseUrl  || W.baseUrl || "http://localhost:4000";
 
