@@ -1,4 +1,4 @@
-# ⚡ SharpKit — Plug-and-Play Sharp Token Integration Layer
+#  SharpKit — Plug-and-Play Sharp Token Integration Layer
 
 > Like Stripe, but for a Web3 loyalty token. Add Earn / Spend / Buy Sharp Token to any app in under 5 minutes.
 
